@@ -1,0 +1,25 @@
+feat: Inicializacion y configuracion del nucleo del backend Facecow
+
+Que se hizo:
+1. Inicializacion y scaffolding de la autenticacion Web utilizando Laravel Breeze con la pila Livewire/Volt.
+2. Instalacion y configuracion del sistema de API REST utilizando Laravel Sanctum para dar soporte a la futura App Movil.
+3. Configuracion y publicacion de CORS para habilitar peticiones seguras de origen cruzado entre la app y el backend.
+4. Ajustes en las migraciones de base de datos para garantizar la compatibilidad con tu motor MySQL (previniendo el error de limite de longitud de indice de 1000 bytes).
+5. Configuracion global de la longitud de cadenas a 191 caracteres en el AppServiceProvider.
+
+Por que se hizo:
+- La plataforma Facecow requiere una estructura de monorepo hibrida: paneles web (Ganadero, Admin y Web publica) y al mismo tiempo servir como API REST para las operaciones de campo en la App Movil.
+- El error de base de datos "Specified key was too long; max key length is 1000 bytes" bloqueaba las migraciones en WAMP/MySQL debido al uso de utf8mb4. Reducir de forma segura las columnas indexadas de tablas criticas desbloqueo las migraciones.
+
+Como se hizo:
+- Se corrio el scaffolding de autenticacion Breeze y se instalaron las dependencias de NPM (resolviendo compatibilidad con Vite 8 mediante `--legacy-peer-deps`).
+- Se instalo la infraestructura de API con `php artisan install:api`.
+- Se limito en `0001_01_01_000002_create_jobs_table.php` las columnas `connection` y `queue` a 100 caracteres en la tabla `failed_jobs`.
+- Se modifico `*_create_personal_access_tokens_table.php` reemplazando `$table->morphs('tokenable')` por columnas manuales con longitud reducida (`tokenable_type` a 100 caracteres).
+- Se restauro `Schema::defaultStringLength(191)` en `AppServiceProvider.php` tras ser sobrescrita por Breeze.
+- Se ejecuto `php artisan migrate:fresh` y se publico el archivo de configuracion de CORS.
+
+Funcionalidad bien explicada:
+- Autenticacion Web: Sistema de login, registro, perfiles y seguridad listo para los paneles de la web.
+- API REST con Sanctum: Endpoint `/api/user` autenticado listo para que la App Movil (React Native) pueda iniciar sesion de forma segura, recibir y guardar tokens de acceso.
+- Base de datos estructurada: Tablas base de Laravel (usuarios, sesiones, colas de trabajo, tokens) levantadas correctamente y protegidas ante limites de indices de MySQL.

@@ -1,0 +1,160 @@
+# Arquitectura Recomendada para SaaS Ganadero (FaceCow)
+
+Este documento detalla la estructura y arquitectura recomendadas para tu plataforma SaaS de trazabilidad ganadera, la cual abarca:
+1. **Sitio Web Público** (Marketing, landing pages, registro).
+2. **Panel de Administrador** (Gestión global de la plataforma, planes, soporte).
+3. **Panel de Ganadero** (Inventario, genealogía, geolocalización, ventas).
+4. **App Móvil** (Operaciones de campo, lectura de tags RFID/código de barras, geolocalización en tiempo real).
+
+---
+
+## 1. Estrategia de Arquitectura: Monorepo Híbrido
+
+Dado que vas a usar **Laravel + React + Inertia.js**, la mejor estrategia es un **Monorepo Híbrido**. 
+
+* **Para la Web (Sitio Web, Admin y User)**: Usamos la arquitectura monolítica de **Inertia.js**. Laravel sirve directamente las vistas React sin necesidad de construir una API REST separada para la web, acelerando el desarrollo y simplificando el control de sesiones.
+* **Para la App Móvil**: Los dispositivos móviles no pueden renderizar Inertia.js directamente. Por ende, la app móvil (desarrollada preferiblemente en **React Native / Expo**) consumirá un **API REST** expuesto por el mismo backend de Laravel.
+
+### Ventajas de este enfoque:
+- **Base de Datos Única**: Todos los paneles y la app móvil acceden a los mismos modelos de Eloquent y base de datos.
+- **Validaciones Compartidas**: Las reglas de negocio, lógica de trazabilidad y validaciones de genealogía se programan una sola vez en el backend.
+- **Organización Limpia**: Cada panel tiene sus controladores y páginas React bien separados dentro del mismo proyecto.
+
+---
+
+## 2. Estructura de Directorios Propuesta
+
+A continuación se muestra cómo estructurar el proyecto Laravel para albergar los 4 entornos de manera ordenadora.
+
+```text
+facecow/ (Raíz del proyecto Laravel)
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Web/           # Controladores del Sitio Web Público (Inertia)
+│   │   │   ├── Admin/         # Controladores del Panel Admin (Inertia)
+│   │   │   ├── User/          # Controladores del Panel Ganadero (Inertia)
+│   │   │   └── Api/           # Controladores de la API REST para la App Móvil
+│   │   └── Middleware/
+│   │       └── HandleInertiaRequests.php
+│   ├── Models/                # Modelos de Eloquent (Animal, Corral, Feed, Transaction, etc.)
+│   └── Providers/
+├── routes/
+│   ├── web.php                # Rutas públicas del Sitio Web
+│   ├── admin.php              # Rutas del Panel Admin (requiere auth de admin)
+│   ├── user.php               # Rutas del Panel Ganadero (requiere auth de ganadero)
+│   └── api.php                # Rutas del API REST (usadas por la App Móvil, auth:sanctum)
+├── resources/
+│   ├── js/
+│   │   ├── Pages/             # Páginas de React organizadas por módulo
+│   │   │   ├── Web/           # Vistas del Sitio Web Público
+│   │   │   ├── Admin/         # Vistas del Panel Admin
+│   │   │   └── User/          # Vistas del Panel Ganadero (Propietarios)
+│   │   ├── Layouts/           # Layouts reutilizables (WebLayout, AdminLayout, UserLayout)
+│   │   ├── Components/        # Componentes UI reutilizables (Botones, Gráficos, Inputs)
+│   │   ├── css/
+│   │   └── app.jsx
+├── mobile/                    # <-- CARPETA DE LA APP MÓVIL (React Native / Expo)
+│   ├── src/
+│   │   ├── components/
+│   │   ├── screens/
+│   │   └── services/          # Conexión al API REST de Laravel (Axios / Fetch)
+│   ├── package.json
+│   └── App.js
+```
+
+### Explicación de las Carpetas de Orientación:
+1. **Web pública**: `resources/js/Pages/Web` + `Http/Controllers/Web` + `routes/web.php`.
+2. **Panel Admin**: `resources/js/Pages/Admin` + `Http/Controllers/Admin` + `routes/admin.php`.
+3. **Panel Ganadero (User)**: `resources/js/Pages/User` + `Http/Controllers/User` + `routes/user.php`.
+4. **App Móvil**: Ubicada en la carpeta raíz `/mobile`. Es un proyecto independiente de React Native/Expo que se comunica mediante `routes/api.php` con el backend.
+
+---
+
+## 3. Modelo de Base de Datos para Trazabilidad Ganadera
+
+Para lograr un seguimiento total ("del corral al plato") y evitar la venta ilegal, la base de datos debe ser robusta. Aquí tienes una propuesta de entidades esenciales:
+
+```mermaid
+erDiagram
+    USERS ||--o{ RANCHES : owns
+    RANCHES ||--o{ CORRALS : contains
+    RANCHES ||--o{ ANIMALS : raises
+    CORRALS ||--o{ ANIMAL_MOVEMENTS : destination
+    ANIMALS ||--o{ ANIMAL_MOVEMENTS : moves
+    ANIMALS ||--o{ FEEDINGS : eats
+    FEEDINGS }o--|| FEEDS : type
+    ANIMALS ||--o{ GEOLOCATIONS : tracks
+    ANIMALS ||--o{ TRANSACTIONS : traded
+    TRANSACTIONS ||--|| TRANSACTION_GUIDES : requires
+```
+
+
+
+
+### Tablas Principales:
+
+1. **`animals` (Ganado)**
+   - `id` (UUID / BigInt)
+   - `tag_id` (Código RFID, arete físico o código de barras para evitar duplicados y venta ilegal)
+   - `ranch_id` (Rancho actual)
+   - `corral_id` (Corral actual)
+   - `mother_id` (Relación a esta misma tabla, nullable)
+   - `father_id` (Relación a esta misma tabla, nullable)
+   - `breed` (Raza)
+   - `gender` (Macho / Hembra)
+   - `birth_date`
+   - `purpose` (Comida / Producción de Leche / Reproducción)
+   - `status` (Activo, Vendido, Enfermo, Deceso, Faenado)
+
+2. **`corrals` (Corrales y Potreros)**
+   - `id`
+   - `ranch_id`
+   - `name`
+   - `coordinates` (Polígono geográfico o punto central para geolocalización)
+
+3. **`animal_movements` (Historial de Destinos/Movimiento)**
+   - `id`
+   - `animal_id`
+   - `origin_corral_id`
+   - `destination_corral_id`
+   - `moved_by_user_id` (Quién realizó el movimiento físico)
+   - `timestamp`
+
+4. **`feedings` (Alimentación)**
+   - `id`
+   - `corral_id` o `animal_id` (Si se alimenta en lote o individual)
+   - `feed_type_id` (Silos, pasto natural, concentrado)
+   - `quantity`
+   - `fed_by_user_id` (Quién alimentó)
+   - `timestamp`
+
+5. **`transactions` & `transaction_guides` (Prevención de Venta Ilegal)**
+   - Para evitar la venta ilegal, cada transacción debe asociarse a una **Guía de Traslado Oficial** (documento sanitario o gubernamental digitalizado).
+   - Registra el `seller_id`, `buyer_id`, `animal_id`, `price` y el estado de la venta. El ganado no puede cambiar de "propietario" en el sistema si la transacción no está firmada/aprobada digitalmente con su respectiva guía.
+
+---
+
+## 4. Autenticación y Flujo de Sesión
+
+* **Para la Web (Sitio Web, Admin, User)**:
+  - Usamos **Laravel Breeze** (o Jetstream) configurado con Inertia y React.
+  - Implementamos **Roles y Permisos** (usando un paquete como `spatie/laravel-permission` o políticas nativas de Laravel).
+  - Un middleware verificará si el usuario es `admin` (acceso a `/admin`) o `ganadero` (acceso a `/panel`).
+
+* **Para la App Móvil**:
+  - Usamos **Laravel Sanctum**. Es extremadamente ligero y perfecto para APIs móviles.
+  - La app móvil envía las credenciales a `/api/login`, y Laravel devuelve un **API Token** (JWT-like).
+  - La app móvil almacena este token localmente (SecureStore en Expo) y lo envía en la cabecera `Authorization: Bearer <token>` en cada petición.
+
+---
+
+## 5. Próximos Pasos para Iniciar
+
+Si decides implementar esta arquitectura, los pasos iniciales recomendados son:
+
+1. **Inicializar Laravel**: Crear el proyecto base.
+2. **Instalar Breeze/Inertia/React**: Configurar el stack de frontend.
+3. **Instalar Laravel Sanctum**: Dejar lista la API para la app móvil.
+4. **Crear las rutas base**: Configurar los archivos `routes/web.php`, `routes/admin.php`, `routes/user.php` y `routes/api.php` en `app/Providers/RouteServiceProvider.php`.
+5. **Configurar el directorio `/mobile`**: Iniciar un proyecto Expo/React Native en la raíz.
