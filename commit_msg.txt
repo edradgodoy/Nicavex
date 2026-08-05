@@ -1,25 +1,21 @@
-feat: Inicializacion y configuracion del nucleo del backend Facecow
+docs: Documentación completa del proyecto y sincronización del README
 
 Que se hizo:
-1. Inicializacion y scaffolding de la autenticacion Web utilizando Laravel Breeze con la pila Livewire/Volt.
-2. Instalacion y configuracion del sistema de API REST utilizando Laravel Sanctum para dar soporte a la futura App Movil.
-3. Configuracion y publicacion de CORS para habilitar peticiones seguras de origen cruzado entre la app y el backend.
-4. Ajustes en las migraciones de base de datos para garantizar la compatibilidad con tu motor MySQL (previniendo el error de limite de longitud de indice de 1000 bytes).
-5. Configuracion global de la longitud de cadenas a 191 caracteres en el AppServiceProvider.
+1. Reemplazo del README.md genérico por la documentación oficial y detallada del SaaS Ganadero FaceCow (Nicavex) en español.
+2. Sincronización de la documentación tanto en la raíz del repositorio (README.md) como dentro de la carpeta del subproyecto Laravel (facecow/README.md).
+3. Integración del logotipo oficial del proyecto y badges informativas de las versiones del stack tecnológico principal.
 
 Por que se hizo:
-- La plataforma Facecow requiere una estructura de monorepo hibrida: paneles web (Ganadero, Admin y Web publica) y al mismo tiempo servir como API REST para las operaciones de campo en la App Movil.
-- El error de base de datos "Specified key was too long; max key length is 1000 bytes" bloqueaba las migraciones en WAMP/MySQL debido al uso de utf8mb4. Reducir de forma segura las columnas indexadas de tablas criticas desbloqueo las migraciones.
+- Es crucial que el repositorio cuente con una presentación premium y profesional en GitHub, facilitando que cualquier colaborador o visitante entienda el propósito de la plataforma de forma inmediata al ingresar al repositorio.
+- Sincronizar el README en la raíz y en la subcarpeta `facecow` garantiza que la documentación sea accesible y visible tanto desde el index principal de GitHub como dentro del editor local al trabajar en el código de la app.
 
 Como se hizo:
-- Se corrio el scaffolding de autenticacion Breeze y se instalaron las dependencias de NPM (resolviendo compatibilidad con Vite 8 mediante `--legacy-peer-deps`).
-- Se instalo la infraestructura de API con `php artisan install:api`.
-- Se limito en `0001_01_01_000002_create_jobs_table.php` las columnas `connection` y `queue` a 100 caracteres en la tabla `failed_jobs`.
-- Se modifico `*_create_personal_access_tokens_table.php` reemplazando `$table->morphs('tokenable')` por columnas manuales con longitud reducida (`tokenable_type` a 100 caracteres).
-- Se restauro `Schema::defaultStringLength(191)` en `AppServiceProvider.php` tras ser sobrescrita por Breeze.
-- Se ejecuto `php artisan migrate:fresh` y se publico el archivo de configuracion de CORS.
+- Se redactó un README.md premium estructurado con secciones de descripción general, características clave (Monitoreo GPS satelital con Leaflet, CRUD de ganado con DataTables/SweetAlert2, trazabilidad de origen y traducción multiidioma).
+- Se incluyó la sección de identidad visual con los códigos de color hexadecimales oficiales de la paleta corporativa del SaaS Ganadero (Cielo, Montaña, Neutros y Acento Neón).
+- Se documentó la estructura de datos (tabla `cattles`) detallando el propósito de cada campo, incluyendo coordenadas GPS y estados de salud.
+- Se agregaron las guías de instalación rápida paso a paso basadas en los scripts automatizados de Composer (`setup` y `dev`).
+- Se documentaron las credenciales de acceso de prueba (`admin@facecow.com` / `password`) que el seeder de base de datos crea de manera automatizada.
 
 Funcionalidad bien explicada:
-- Autenticacion Web: Sistema de login, registro, perfiles y seguridad listo para los paneles de la web.
-- API REST con Sanctum: Endpoint `/api/user` autenticado listo para que la App Movil (React Native) pueda iniciar sesion de forma segura, recibir y guardar tokens de acceso.
-- Base de datos estructurada: Tablas base de Laravel (usuarios, sesiones, colas de trabajo, tokens) levantadas correctamente y protegidas ante limites de indices de MySQL.
+- Documentación de Proyecto: Acceso inmediato a todo el alcance del software, arquitectura de datos y paleta de colores oficial.
+- Guía de Arranque Rápido: Explicación de los comandos rápidos de consola para levantar dependencias de Laravel y Vite en pocos segundos.

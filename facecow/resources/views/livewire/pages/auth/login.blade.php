@@ -25,47 +25,57 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
+    <h4 class="text-center text-primary-custom mb-4 font-weight-bold" style="font-weight: 700;">
+        {{ __('Login') }}
+    </h4>
+
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <x-ganado.message style="info">
+            {{ session('status') }}
+        </x-ganado.message>
+    @endif
 
     <form wire:submit="login">
         <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+        <x-ganado.input 
+            name="form.email" 
+            label="{{ __('Email') }}" 
+            type="email" 
+            wire:model="form.email"
+            placeholder="correo@ejemplo.com"
+            required 
+            autofocus 
+        />
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
+        <x-ganado.input 
+            name="form.password" 
+            label="{{ __('Password') }}" 
+            type="password" 
+            wire:model="form.password"
+            placeholder="••••••••"
+            required 
+        />
 
         <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="form-check mb-3">
+            <input wire:model="form.remember" id="remember" type="checkbox" class="form-check-input" name="remember">
+            <label for="remember" class="form-check-label text-secondary-custom small">
+                {{ __('Remember me') ? 'Recordar mi cuenta' : 'Remember me' }}
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="d-flex align-items-center justify-content-between mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
+                <a class="small text-secondary-custom text-decoration-none" href="{{ route('password.request') }}" wire:navigate>
+                    {{ __('Forgot your password?') ? '¿Olvidaste tu contraseña?' : 'Forgot your password?' }}
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            <x-ganado.button type="submit" style="primary">
+                {{ __('Login') }}
+            </x-ganado.button>
         </div>
     </form>
 </div>

@@ -1,0 +1,47 @@
+{
+    "Home": "Inicio",
+    "Features": "Características",
+    "Pricing": "Precios",
+    "Contact": "Contacto",
+    "Login": "Iniciar Sesión",
+    "Register": "Registrarse",
+    "Dashboard": "Panel de Control",
+    "Cattle Inventory": "Inventario de Ganado",
+    "Geolocation Map": "Mapa GPS",
+    "Dark Mode": "Modo Oscuro",
+    "Light Mode": "Modo Claro",
+    
+    "Welcome to SaaS Ganadero": "Bienvenido al Sistema SaaS Ganadero",
+    "SaaS Ganadero Subtitle": "La plataforma inteligente para el control, verificación de origen y geolocalización de tu ganado.",
+    "Get Started": "Comenzar Ahora",
+    
+    "Total Cattle": "Ganado Total",
+    "Active Trackers": "Localizadores GPS Activos",
+    "Pending Health Checks": "Revisiones de Salud Pendientes",
+    "Verified Origin Transactions": "Transacciones Verificadas",
+    "Recent Cattle Activity": "Actividad Reciente del Ganado",
+    
+    "Breed": "Raza",
+    "Weight": "Peso",
+    "Health Status": "Estado de Salud",
+    "Origin": "Origen",
+    "Verified": "Verificado",
+    "Unverified": "No Verificado",
+    "Actions": "Acciones",
+    
+    "Add Cattle": "Añadir Cabeza de Ganado",
+    "Edit Cattle": "Editar Cabeza de Ganado",
+    "Arete/Tag ID": "Arete / Identificador",
+    "Save": "Guardar",
+    "Cancel": "Cancelar",
+    "Confirm Delete": "Confirmar Eliminación",
+    "Delete Warning": "¿Estás seguro de que deseas eliminar este registro de ganado?",
+    "Cattle Deleted Successfully": "Registro de ganado eliminado con éxito.",
+    "Cattle Saved Successfully": "Registro de ganado guardado con éxito.",
+    
+    "Success": "Éxito",
+    "Warning": "Advertencia",
+    "Danger": "Peligro",
+    "Info": "Información",
+    "Language Changed": "Idioma cambiado correctamente."
+}

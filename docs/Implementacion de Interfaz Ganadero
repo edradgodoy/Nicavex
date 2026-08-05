@@ -1,0 +1,220 @@
+# Implementación de Interfaz Minimalista Glassmorphic para SaaS Ganadero
+
+Este plan detalla el diseño y la reestructuración de la interfaz del proyecto Laravel en `./facecow`, aplicando la paleta de colores corporativa (Cielo, Montaña, Neutros) mediante **Bootstrap**, **Bootstrap Icons**, **DataTables** y **SweetAlert**, removiendo por completo Tailwind CSS. Implementaremos un sistema de diseño minimalista con efecto glassmorphism, soporte de temas (claro/oscuro), internacionalización (i18n), separación física de vistas, controladores y modelos en carpetas de `web` (público) y `admin` (privado), y componentes Blade altamente reutilizables.
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Reemplazo de Estilos de Laravel:** Se eliminará la compilación y dependencias de Tailwind CSS de Vite para usar Bootstrap, Bootstrap Icons, DataTables y SweetAlert. Se adaptarán las vistas de Breeze (Login, Registro) para que utilicen los nuevos componentes personalizados y no rompan la autenticación.
+>
+> **Organización Física de Clases y Vistas:** Para mantener la separación de responsabilidades solicitada:
+>
+> - Las vistas se agruparán en `resources/views/web` y `resources/views/admin`.
+> - Los controladores se agruparán en `app/Http/Controllers/Web` and `app/Http/Controllers/Admin`.
+> - Los modelos se organizarán bajo `app/Models/Web` (si aplica) y `app/Models/Admin`, o bien se crearán modelos de dominio compartidos y clases organizadas según su contexto.
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+>
+> 1. **Modelos Específicos:** ¿Deseas que los modelos compartan una base de datos única (p.ej. `Cattle` y `Sale` en namespaces compartidos o separados)? Sugerimos crear una base común en `app/Models/` y crear subclases u organizarlos en carpetas si es estrictamente necesario, aunque Laravel suele centralizar los modelos. ¿Prefieres carpetas `app/Models/Web` y `app/Models/Admin` explícitas?
+> 2. **Base de Datos y Migraciones:** Para hacer funcionales las vistas de administración (Inventario de Ganado con DataTable y Mapa de Geolocalización), ¿deseas que creemos las migraciones correspondientes (p.ej. `cattle` con campos como arete, raza, peso, estado de salud, geolocalización, verificado) o trabajamos con datos estáticos simulados?
+> 3. **Adaptación de Vistas de Breeze/Auth:** Por defecto, Breeze usa vistas Tailwind para Login y Registro. ¿Deseas que adaptemos el layout `guest` y estas vistas de autenticación para que usen la estética glassmorphic y los nuevos componentes de Bootstrap? (Recomendado para una experiencia de usuario fluida).
+
+---
+
+## Proposed Changes
+
+### Componentes de Presentación y Estilos
+
+Se instalarán las dependencias necesarias (`bootstrap`, `bootstrap-icons`, `datatables.net-bs5`, `sweetalert2`) y se configurará Vite.
+
+#### [NEW] [app.js](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/js/app.js)
+
+- Inicializará Bootstrap, SweetAlert y la lógica global del tema oscuro/claro (guardando el estado en `localStorage` y aplicando `data-mode` en `<html>`).
+- Registrará las funciones globales para interactuar con DataTables y alertas SweetAlert.
+
+#### [MODIFY] [vite.config.js](file:///c:/wamp64/www/facecow/Nicavex/facecow/vite.config.js)
+
+- Asegurará que Vite use `resources/js/app.js` como punto de entrada de Javascript en lugar de `app.jsx`.
+
+#### [MODIFY] [app.css](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/css/app.css)
+
+- Importará Bootstrap y Bootstrap Icons.
+- Definirá la paleta de colores de la skill `diseno-saas-ganadero`.
+- Implementará las clases de glassmorphism (difuminado de fondo, bordes translúcidos, sombras suaves, gradientes en modo oscuro y claro).
+
+---
+
+### Componentes Blade Reutilizables
+
+Crearemos un set de componentes bajo `resources/views/components/ganado` para aislar el HTML/CSS:
+
+#### [NEW] [button.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/button.blade.php)
+
+- Componente único para botones. Acepta atributos como `style` (`primary`, `secondary`, `success`, `danger`, `warning`, `info`, `neutral`), `size` (`sm`, `md`, `lg`), `outline` (true/false) y `icon` (icono de bootstrap-icons).
+
+#### [NEW] [card.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/card.blade.php)
+
+- Tarjeta glassmorphic con cabecera opcional, pie de página, gradiente de fondo interno y efecto blur.
+
+#### [NEW] [input.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/input.blade.php)
+
+- Inputs glassmorphic translúcidos (soporta text, email, number, select, password) con etiquetas de texto dinámicas y manejo de errores i18n.
+
+#### [NEW] [grid.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/grid.blade.php)
+
+- Contenedor de grilla adaptativo basado en columnas dinámicas para pantallas de admin y landing.
+
+#### [NEW] [image.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/image.blade.php)
+
+- Imagen con máscara glassmorphic, cargando un esqueleto visual (placeholder pulido) y soporte de bordes redondeados temáticos.
+
+#### [NEW] [message.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/message.blade.php)
+
+- Alertas y toasts dinámicos flotantes que utilizan los colores semánticos (`success`, `warning`, `danger`, `info`).
+
+---
+
+### Rutas e Internacionalización (i18n)
+
+#### [NEW] [es.json](file:///c:/wamp64/www/facecow/Nicavex/facecow/lang/es.json) y [en.json](file:///c:/wamp64/www/facecow/Nicavex/facecow/lang/en.json)
+
+- Diccionarios de internacionalización con traducciones del sitio público (Hero, Planes, Precios, Características) y del panel administrativo (Ganado, Arete, Raza, Peso, Geolocalización, Verificado, etc.).
+
+#### [NEW] [SetLocale.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Middleware/SetLocale.php)
+
+- Middleware para interceptar la cookie o sesión de lenguaje y configurar `app()->setLocale()` en cada consulta HTTP.
+
+#### [MODIFY] [web.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/routes/web.php)
+
+- Registrará las rutas públicas bajo controladores en `Web\` y las rutas protegidas bajo controladores en `Admin\`.
+- Añadirá la ruta de cambio de idioma (`locale/{lang}`).
+
+---
+
+### Controladores y Vistas por Capas (Web vs Admin)
+
+#### Capa Pública (Web)
+
+- **Controlador:** [HomeController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Web/HomeController.php)
+- **Layout:** [web.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/layouts/web.blade.php) (Layout minimalista con navbar de landing, selector de idioma, switch de tema claro/oscuro y pie de página).
+- **Vistas:**
+  - [home.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/web/home.blade.php): Landing page con secciones de características, precios e inicio de sesión integrados.
+
+#### Capa Privada (Admin)
+
+- **Controlador de Dashboard:** [DashboardController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Admin/DashboardController.php)
+- **Controlador de Inventario (Cattle):** [CattleController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Admin/CattleController.php)
+- **Layout:** [admin.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/layouts/admin.blade.php) (Sidebar lateral colapsable, barra superior con notificaciones, perfil, idioma y modo oscuro).
+- **Modelos:**
+  - [Cattle.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Models/Admin/Cattle.php) para control administrativo de ganado.
+- **Vistas:**
+  - [dashboard.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/dashboard.blade.php): Métricas rápidas en tarjetas glassmorphic, gráficos simulados y actividades recientes.
+  - [index.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/cattle/index.blade.php): Inventario de ganado integrado con DataTable e inicializado con la paleta de colores.
+  - [map.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/map.blade.php): Mapa interactivo/geolocalización con pines de GPS activos (estilo neón).
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+- Ejecución de `php artisan test` para asegurar que el enrutamiento y la carga de controladores de `Web` y `Admin` funcionen sin fallos de compilación.
+- Compilación de recursos con `npm run build` para asegurar que no existan dependencias rotas y que el bundle de Vite se genere con éxito.
+
+### Manual Verification
+
+1. Abrir la página pública y probar el selector de idiomas (Español <-> Inglés) verificando que cambien los textos i18n.
+2. Hacer clic en el switch de modo oscuro / modo claro en el navbar y validar que se aplique la clase `[data-mode="dark"]` y los estilos glassmorphic reaccionen al cambio.
+3. Entrar a la sección administrativa y validar la carga de DataTables y la apertura de alertas de SweetAlert con los botones de estilo corporativo (Cielo/Montaña).
+4. Probar la responsividad de los componentes de grilla y tarjeta glassmorphic en resolución de escritorio y móvil.
+
+# Walkthrough - Rediseño Minimalista Glassmorphic (SaaS Ganadero)
+
+Hemos finalizado con éxito la implementación del sistema de diseño personalizado para el **Sistema SaaS Ganadero** de Nicavex, reemplazando por completo Tailwind CSS e integrando **Bootstrap 5**, **Bootstrap Icons**, **DataTables** y **SweetAlert** con una estética premium de efecto glassmorphism.
+
+---
+
+## Cambios Realizados
+
+### 1. Sistema de Diseño e Integración Bootstrap
+
+- **[Custom CSS] [app.css](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/css/app.css):** Declaración de variables de color (Cielo, Montaña, Neutros) de la skill corporativa. Creación de clases utilitarias para el efecto de desenfoque de fondo (glassmorphism), bordes translúcidos, gradientes dinámicos e integración directa de variables CSS en Bootstrap.
+- **[Custom JS] [app.js](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/js/app.js):** Inicialización de Bootstrap, SweetAlert, DataTables y lógica global del tema oscuro/claro con persistencia en `localStorage`.
+- **[Vite Setup] [package.json](file:///c:/wamp64/www/facecow/Nicavex/facecow/package.json):** Añadidas las dependencias requeridas (`bootstrap`, `bootstrap-icons`, `datatables.net-bs5`, `sweetalert2`) y removidas las referencias a Tailwind CSS.
+
+### 2. Componentes Blade Reutilizables
+
+Hemos creado un conjunto completo de componentes bajo `resources/views/components/ganado`:
+
+- **[Button Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/button.blade.php):** Soporta múltiples estilos (`primary`, `secondary`, `neutral`, `danger`), tamaños, outlines e iconos automáticos de Bootstrap Icons.
+- **[Card Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/card.blade.php):** Tarjeta glassmorphic con cabecera y pie de página traslúcidos.
+- **[Input Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/input.blade.php):** Entradas de texto, selectores y textareas glassmorphic con renderizado de errores de validación integrado.
+- **[Grid Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/grid.blade.php):** Estructura de grilla responsive basada en columnas dinámicas.
+- **[Image Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/image.blade.php):** Contenedor de imágenes con mascarilla glassmorphic y relaciones de aspecto personalizadas.
+- **[Message Component](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/components/ganado/message.blade.php):** Alertas y Toasts flotantes con estilos semánticos (`success`, `warning`, `danger`, `info`).
+
+### 3. Internacionalización (i18n)
+
+- **[ES Translation](file:///c:/wamp64/www/facecow/Nicavex/facecow/lang/es.json) y [EN Translation](file:///c:/wamp64/www/facecow/Nicavex/facecow/lang/en.json):** Diccionarios de idioma con traducción para todas las secciones públicas y del panel de control.
+- **[Middleware SetLocale](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Middleware/SetLocale.php):** Intercepta el idioma seleccionado del usuario y lo aplica al entorno de ejecución en cada consulta. Registrado en el archivo [bootstrap/app.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/bootstrap/app.php).
+
+### 4. Capas Web y Admin (Vistas, Controladores y Modelos)
+
+- **Capa Pública (Web):**
+  - **Controlador:** [HomeController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Web/HomeController.php).
+  - **Layout:** [layouts/web.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/layouts/web.blade.php) (con barra de navegación, selector de idioma, switch de tema y footer).
+  - **Vista:** [web/home.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/web/home.blade.php) (Landing page con features, pricing, etc.).
+- **Capa Administrativa (Admin):**
+  - **Controladores:** [DashboardController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Admin/DashboardController.php) y [CattleController.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Http/Controllers/Admin/CattleController.php).
+  - **Modelos:** [app/Models/Admin/Cattle.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/app/Models/Admin/Cattle.php).
+  - **Layout:** [layouts/admin.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/layouts/admin.blade.php) (con sidebar colapsable, encabezados y menús).
+  - **Vistas:**
+    - [admin/dashboard.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/dashboard.blade.php) (Estadísticas rápidas, radar satelital, tabla de actividades recientes).
+    - [admin/cattle/index.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/cattle/index.blade.php) (Inventario en DataTable con modal CRUD integrado y confirmaciones SweetAlert).
+    - [admin/map.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/admin/map.blade.php) (Mapa GPS interactivo Leaflet.js con baldosas de modo claro y oscuro dinámicas).
+
+### 5. Configuración de Rutas y Autenticación
+
+- **Rutas:** [routes/web.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/routes/web.php) configurado con los prefijos y middlewares `auth` y `verified`.
+- **Breeze / Auth adaptado:**
+  - **Layout de Invitado:** [layouts/guest.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/layouts/guest.blade.php).
+  - **Vistas:** [login.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/livewire/pages/auth/login.blade.php) y [register.blade.php](file:///c:/wamp64/www/facecow/Nicavex/facecow/resources/views/livewire/pages/auth/register.blade.php) adaptados a Bootstrap y Glassmorphism.
+
+---
+
+## Guía de Verificación Local
+
+Debido a que el entorno de terminal de tu sistema operativo experimenta problemas de permisos para redireccionar descriptores (`opening NUL for ACL write: Acceso denegado`), requerimos que ejecutes los siguientes comandos manualmente en tu consola para completar la instalación de las dependencias y la migración de base de datos:
+
+### Paso 1: Instalar dependencias e iniciar el servidor de desarrollo
+
+En la carpeta `./facecow/`, ejecuta:
+
+```bash
+npm install
+npm run dev
+```
+
+### Paso 2: Ejecutar Migraciones y Poblar Datos de Prueba
+
+Para crear la tabla de ganado y rellenarla con registros ficticios en Nicaragua, ejecuta:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+### Paso 3: Probar el Sistema
+
+1. Abre el sitio web en tu navegador (`http://localhost:8000` o la URL activa).
+2. **Registro/Ingreso:** Puedes registrar una cuenta nueva o usar las credenciales de prueba generadas por el seeder:
+   - **Usuario:** `admin@facecow.com`
+   - **Contraseña:** `password`
+3. **Internacionalización:** Prueba cambiar entre **ES** y **EN** usando el menú de idiomas en la cabecera.
+4. **Modo Claro / Oscuro:** Presiona el botón del sol/luna para verificar la transición fluida del efecto glassmorphism en ambos temas.
+5. **Inventario y Geolocalización:** Explora el panel administrativo (`admin/cattle` y `admin/map`) para verificar la interactividad de la tabla DataTables, el mapa satelital Leaflet.js y los diálogos modales.

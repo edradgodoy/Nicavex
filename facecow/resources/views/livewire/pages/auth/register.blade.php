@@ -37,52 +37,60 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
+    <h4 class="text-center text-primary-custom mb-4 font-weight-bold" style="font-weight: 700;">
+        {{ __('Register') }}
+    </h4>
+
     <form wire:submit="register">
         <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full" type="text" name="name" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+        <x-ganado.input 
+            name="name" 
+            label="{{ __('Name') ? 'Nombre Completo' : 'Name' }}" 
+            type="text" 
+            wire:model="name"
+            placeholder="Juan Pérez"
+            required 
+            autofocus 
+        />
 
         <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-ganado.input 
+            name="email" 
+            label="{{ __('Email') }}" 
+            type="email" 
+            wire:model="email"
+            placeholder="correo@ejemplo.com"
+            required 
+        />
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
+        <x-ganado.input 
+            name="password" 
+            label="{{ __('Password') }}" 
+            type="password" 
+            wire:model="password"
+            placeholder="••••••••"
+            required 
+        />
 
         <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+        <x-ganado.input 
+            name="password_confirmation" 
+            label="{{ __('Confirm Password') ? 'Confirmar Contraseña' : 'Confirm Password' }}" 
+            type="password" 
+            wire:model="password_confirmation"
+            placeholder="••••••••"
+            required 
+        />
 
-            <x-text-input wire:model="password_confirmation" id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}" wire:navigate>
-                {{ __('Already registered?') }}
+        <div class="d-flex align-items-center justify-content-between mt-4">
+            <a class="small text-secondary-custom text-decoration-none" href="{{ route('login') }}" wire:navigate>
+                {{ __('Already registered?') ? '¿Ya estás registrado?' : 'Already registered?' }}
             </a>
 
-            <x-primary-button class="ms-4">
+            <x-ganado.button type="submit" style="primary">
                 {{ __('Register') }}
-            </x-primary-button>
+            </x-ganado.button>
         </div>
     </form>
 </div>

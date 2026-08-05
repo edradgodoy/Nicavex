@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Limpiar y crear usuario administrativo de prueba
+        User::where('email', 'admin@facecow.com')->delete();
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Administrador Nicavex',
+            'email' => 'admin@facecow.com',
+            'password' => bcrypt('password'),
         ]);
+
+        // Crear registros de ganado de prueba
+        \App\Models\Admin\Cattle::truncate();
+        \App\Models\Admin\Cattle::factory(25)->create();
     }
 }

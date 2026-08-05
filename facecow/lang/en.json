@@ -1,0 +1,47 @@
+{
+    "Home": "Home",
+    "Features": "Features",
+    "Pricing": "Pricing",
+    "Contact": "Contact",
+    "Login": "Login",
+    "Register": "Register",
+    "Dashboard": "Dashboard",
+    "Cattle Inventory": "Cattle Inventory",
+    "Geolocation Map": "GPS Map",
+    "Dark Mode": "Dark Mode",
+    "Light Mode": "Light Mode",
+    
+    "Welcome to SaaS Ganadero": "Welcome to SaaS Ganadero",
+    "SaaS Ganadero Subtitle": "The intelligent platform for control, origin verification, and geolocation of your livestock.",
+    "Get Started": "Get Started",
+    
+    "Total Cattle": "Total Cattle",
+    "Active Trackers": "Active GPS Trackers",
+    "Pending Health Checks": "Pending Health Checks",
+    "Verified Origin Transactions": "Verified Transactions",
+    "Recent Cattle Activity": "Recent Cattle Activity",
+    
+    "Breed": "Breed",
+    "Weight": "Weight",
+    "Health Status": "Health Status",
+    "Origin": "Origin",
+    "Verified": "Verified",
+    "Unverified": "Unverified",
+    "Actions": "Actions",
+    
+    "Add Cattle": "Add Cattle Record",
+    "Edit Cattle": "Edit Cattle Record",
+    "Arete/Tag ID": "Arete/Tag ID",
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Confirm Delete": "Confirm Delete",
+    "Delete Warning": "Are you sure you want to delete this cattle record?",
+    "Cattle Deleted Successfully": "Cattle record deleted successfully.",
+    "Cattle Saved Successfully": "Cattle record saved successfully.",
+    
+    "Success": "Success",
+    "Warning": "Warning",
+    "Danger": "Danger",
+    "Info": "Info",
+    "Language Changed": "Language changed successfully."
+}
