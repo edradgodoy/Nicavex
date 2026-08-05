@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/edradgodoy/Nicavex" target="_blank">
-    <img src="https://raw.githubusercontent.com/edradgodoy/Nicavex/main/docs/logo.png" width="320" alt="Nicavex FaceCow Logo">
+    <img src="https://raw.githubusercontent.com/edradgodoy/Nicavex/main/docs/Color/logo.png" width="320" alt="Nicavex FaceCow Logo">
   </a>
 </p>
 
